@@ -92,4 +92,9 @@ public class Database {
 
         return null;
     }
+
+    public boolean changePassword(String login , String oldPassword, String newPassword){
+
+        return false;
+    }
 }
