@@ -1,8 +1,8 @@
 package sk.kosickaakademia.onofrej.chat.database;
 
 import sk.kosickaakademia.onofrej.chat.util.Util;
-import sk.kosickaakademia.onofrej.entity.Message;
-import sk.kosickaakademia.onofrej.entity.User;
+import sk.kosickaakademia.onofrej.chat.entity.User;
+import sk.kosickaakademia.onofrej.chat.entity.Message;
 
 import java.sql.*;
 import java.util.List;
@@ -134,7 +134,7 @@ public class Database {
     }
 
     public int getUserId(String login){
-        
+
         return -1;
     }
 

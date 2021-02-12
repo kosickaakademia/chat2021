@@ -1,4 +1,4 @@
-package sk.kosickaakademia.onofrej.entity;
+package sk.kosickaakademia.onofrej.chat.entity;
 
 public class User {
     private int id;
