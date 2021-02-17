@@ -5,6 +5,7 @@ import sk.kosickaakademia.onofrej.chat.entity.User;
 import sk.kosickaakademia.onofrej.chat.entity.Message;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Database {
@@ -13,7 +14,12 @@ public class Database {
     private String password = "Kosice2021!";
     private final String insertNewUser = "INSERT INTO user (login, password) VALUES (?,?)";
     private final String loginUser = "Select * FROM user Where login LIKE ? and password LIKE ?";
-    private final String newMessage = "INSERT INTO message( frto, to, text) VALUES (?,?,?)";
+    private final String newMessage = "INSERT INTO message( fromUser, toUser, text) VALUES (?,?,?)";
+    private final String getId = "SELECT id FROM user WHERE login LIKE ?";
+    private final String delMessages = "DELETE FROM message WHERE toUser = ?";
+    private final String getMessages = "SELECT * FROM message  " +
+            " INNER JOIN user ON user.id=message.fromUser " +
+            " WHERE toUser = ?";
 
     private Connection getConnection() throws ClassNotFoundException, SQLException {
         Class.forName("com.mysql.cj.jdbc.Driver");
@@ -134,17 +140,77 @@ public class Database {
     }
 
     public int getUserId(String login){
+        if(login==null || login.equals(""))
+           return -1;
+        int id=-1;
+        try {
+            Connection con = getConnection();
+            if(con!=null){
+                PreparedStatement ps=con.prepareStatement(getId);
+                ps.setString(1,login);
+                ResultSet rs= ps.executeQuery();
 
+                if(rs.next()){
+                    id=rs.getInt("id");
+                }
+                con.close();
+                return id;
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
         return -1;
     }
 
     public List<Message> getMyMessages(String login){
-
+        if(login==null  || login.equals(""))
+            return null;
+        int id = getUserId(login);
+        if(id!=-1){
+            try {
+                Connection con = getConnection();
+                if(con==null)
+                    return null;
+                PreparedStatement ps = con.prepareStatement(getMessages);
+                ps.setInt(1,id);
+                List<Message> list= new ArrayList<>();
+                ResultSet rs= ps.executeQuery();
+                while(rs.next()){
+                    String from = rs.getString("user.login");
+                    int idMessage = rs.getInt("message.id");
+                    String text=rs.getString("text");
+                    Date dt = rs.getDate("dt");
+                    Message m = new Message(idMessage, from, login,dt,text);
+                    list.add(m);
+                }
+                con.close();
+                deleteAllMyMessages(login);
+                return list;
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
         // volame metodu deleteAllMyMessages
         return null;
     }
 
     public void deleteAllMyMessages(String login){
+        if(login==null || login.equals(""))
+            return;
+        try {
+            int id = getUserId(login);
+            if(id==-1)
+                return;
+            Connection con = getConnection();
+            if(con==null) return;
+            PreparedStatement ps = con.prepareStatement(delMessages);
+            ps.setInt(1,id);
+            ps.executeUpdate();
+            con.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
     }
 
